@@ -13,38 +13,8 @@ class Node:
     region = [[], []]
 
 
-def walls_and_doors(rows, cols):
-    # initialize the matrix...
-    horizontal_matrix = [[0 for x in range(cols)] for y in range(rows - 1)]
-    vertical_matrix = [[0 for x in range(cols - 1)] for y in range(rows)]
-
-    # populate vertical walls
-    for wall_vertical in walls_vertical:  # split_loc, entry, length, door
-        split_loc = wall_vertical[0]
-        wall_start = wall_vertical[1]
-        wall_length = wall_vertical[2]
-        door = wall_vertical[3]
-        for i in range(wall_length):
-            y = i + wall_start
-            if y != door:
-                vertical_matrix[y][split_loc] = 1
-    print('vertical_matrix = ' + str(vertical_matrix))
-
-    for wall_horizontal in walls_horizontal:
-        split_loc = wall_horizontal[0]
-        wall_start = wall_horizontal[1]
-        wall_length = wall_horizontal[2]
-        door = wall_horizontal[3]
-        for i in range(wall_length):
-            y = i + wall_start
-            if y != door:
-                horizontal_matrix[split_loc][y] = 1
-    print('horizontal_matrix = ' + str(horizontal_matrix))
-
-    return [vertical_matrix, horizontal_matrix]
-
-
-def bsp(node):  # map segmentation success... need to now connect with walls
+# recursively populates a binary tree, also populate globals: walls_horizontal, walls_vertical
+def bsp(node):
     if node is None:
         return
     direction = random.randrange(2)  # 0 = horizontal/row split, 1 = vertical/column split
@@ -85,10 +55,33 @@ def bsp(node):  # map segmentation success... need to now connect with walls
     return
 
 
+def walls_and_doors(rows, cols):
+    # initialize the matrix...
+    horizontal_matrix = [[0 for x in range(cols)] for y in range(rows - 1)]
+    vertical_matrix = [[0 for x in range(cols - 1)] for y in range(rows)]
+    matrix = [horizontal_matrix, vertical_matrix]
+    walls = [walls_horizontal, walls_vertical]
+    for i in range(2):
+        for wall in walls[i]:
+            split_loc = wall[0]
+            wall_start = wall[1]
+            wall_length = wall[2]
+            door = wall[3]
+            for j in range(wall_length):
+                y = j + wall_start
+                if y != door:
+                    if i == 0:
+                        matrix[i][split_loc][y] = 1
+                    else:
+                        matrix[i][y][split_loc] = 1
+        # print('matrix[' + str(i) + '] = ' + str(matrix[i]))
+    return matrix
+
+
 # S for start, X for exit. "-" and "|" represent walls, and "+" are corners
 def draw(rows, cols, dungeon_matrix):
-    vertical_matrix = dungeon_matrix[0]
-    horizontal_matrix = dungeon_matrix[1]
+    horizontal_matrix = dungeon_matrix[0]
+    vertical_matrix = dungeon_matrix[1]
 
     for x in range(0, 2*rows + 1):
         if x == 0 or x == 2*rows:  # draw our top and bottom line
@@ -110,7 +103,7 @@ def draw(rows, cols, dungeon_matrix):
                 else:
                     y_cord = int((y-1)/2)
                     x_cord = int((x-1)/2)
-                    if x % 2 == 0: # corner, horizontal border, or portal
+                    if x % 2 == 0:  # corner, horizontal border, or portal
                         if y % 2 == 0:  # corner
                             sys.stdout.write("+")
                         else:
@@ -119,7 +112,7 @@ def draw(rows, cols, dungeon_matrix):
                             else:
                                 sys.stdout.write(' ')
                     else:  # vertical wall, or cell
-                        if y % 2 == 0:  # y % 2 == 0 checked above.. redundant.. optimize.
+                        if y % 2 == 0:
                             if vertical_matrix[x_cord][y_cord]:
                                 sys.stdout.write('|')
                             else:
@@ -135,19 +128,28 @@ def draw(rows, cols, dungeon_matrix):
 
 
 def main():
+    # Request user input for row and column size
     rows = int(input("Enter the number of rows: "))
     cols = int(input("Enter the number of columns: "))
-    dungeon = Node()
-    dungeon.region = [[0,0], [rows - 1,cols - 1]]
 
+    # Instantiate our maze, assign it a single region
+    dungeon = Node()
+    dungeon.region = [[0, 0], [rows - 1, cols - 1]]
+
+    # Create a randomly generated maze through a recursive Binary Space Partitioning algorithm
+    # end up with walls_horizontal and walls_vertical populated
     bsp(dungeon)
+
+    # walls_and_doors utilizes walls_horizontal and walls_vertical populated above by bsp
+    dungeon_matrix = walls_and_doors(rows, cols)
+
+    # draw is provided with everything it uses
+    draw(rows, cols, dungeon_matrix)
+
+    # walls should match up with what was spit out by draw
     print('walls_horizontal (split, entry, length, door) = ' + str(walls_horizontal))
     print('walls_vertical (split, entry, length, door)   = ' + str(walls_vertical))
 
-    dungeon_matrix = walls_and_doors(rows, cols)
-
-    draw(rows, cols, dungeon_matrix)
-
 
 if __name__ == '__main__':
-        main()
+    main()
