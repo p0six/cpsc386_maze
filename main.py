@@ -2,9 +2,6 @@
 import sys
 import random
 
-# 1) Binary Space Partition, or 2) Kruskal Merge
-# Label the upper left cell with “S” for start and the lower right cell with “X”.
-# Here is an example 5x5 maze output.
 walls_horizontal = []
 walls_vertical = []
 
@@ -45,38 +42,6 @@ def walls_and_doors(rows, cols):
     print('horizontal_matrix = ' + str(horizontal_matrix))
 
     return [vertical_matrix, horizontal_matrix]
-
-
-def main():
-    rows = int(input("Enter the number of rows: "))
-    cols = int(input("Enter the number of columns: "))
-    dungeon = Node()
-    dungeon.region = [[0,0], [rows - 1,cols - 1]]
-
-    bsp(dungeon)
-    print('walls_horizontal (split, entry, length, door) = ' + str(walls_horizontal))
-    print('walls_vertical (split, entry, length, door)   = ' + str(walls_vertical))
-
-    dungeon_matrix = walls_and_doors(rows, cols)
-
-    draw(rows, cols, dungeon_matrix)
-
-
-# one large piece of this puzzle will be determining how to build the text output.... as it looks like this:
-# this is an example of a 5x5 maze... each element is a SQUARE with + indicating corners, and - indicating wall
-'''
-+-+-+-+-+-+
-|S    |   |
-+-+ +-+-+ + // [[0,0] , [0,5]] is a horizontal line
-|   | | | |
-+ +-+ + + +
-|   | |   |
-+-+ + +-+ +
-|         |
-+ +-+-+ + +
-|     | |X|
-+-+-+-+-+-+
-'''
 
 
 def bsp(node):  # map segmentation success... need to now connect with walls
@@ -120,7 +85,7 @@ def bsp(node):  # map segmentation success... need to now connect with walls
     return
 
 
-# the trick will now be to examine our 'partitions', and draw our inner door based on the partitions...
+# S for start, X for exit. "-" and "|" represent walls, and "+" are corners
 def draw(rows, cols, dungeon_matrix):
     vertical_matrix = dungeon_matrix[0]
     horizontal_matrix = dungeon_matrix[1]
@@ -132,8 +97,6 @@ def draw(rows, cols, dungeon_matrix):
             print("+")  # far write character
         else:  # draw the innards of our rectangle
             for y in range(0, 2*cols + 1):
-                y_cord = int((y-1)/2)
-                x_cord = int((x-1)/2)
                 if y == 0:  # left wall
                     if x % 2 == 0:
                         sys.stdout.write("+")
@@ -145,6 +108,8 @@ def draw(rows, cols, dungeon_matrix):
                     else:
                         print("|")
                 else:
+                    y_cord = int((y-1)/2)
+                    x_cord = int((x-1)/2)
                     if x % 2 == 0: # corner, horizontal border, or portal
                         if y % 2 == 0:  # corner
                             sys.stdout.write("+")
@@ -160,12 +125,28 @@ def draw(rows, cols, dungeon_matrix):
                             else:
                                 sys.stdout.write(' ')
                         else:  # start, exit, or empty cell
+                            # Label the upper left cell with “S” for start and the lower right cell with “X”.
                             if x == 1 and y == 1:
                                 sys.stdout.write("S")
                             elif x == (2*rows - 1) and y == (2*cols - 1):
                                 sys.stdout.write("X")
                             else:
                                 sys.stdout.write(" ")
+
+
+def main():
+    rows = int(input("Enter the number of rows: "))
+    cols = int(input("Enter the number of columns: "))
+    dungeon = Node()
+    dungeon.region = [[0,0], [rows - 1,cols - 1]]
+
+    bsp(dungeon)
+    print('walls_horizontal (split, entry, length, door) = ' + str(walls_horizontal))
+    print('walls_vertical (split, entry, length, door)   = ' + str(walls_vertical))
+
+    dungeon_matrix = walls_and_doors(rows, cols)
+
+    draw(rows, cols, dungeon_matrix)
 
 
 if __name__ == '__main__':
