@@ -17,41 +17,42 @@ class Node:
 def bsp(node):
     if node is None:
         return
+
     direction = random.randrange(2)  # 0 = horizontal/row split, 1 = vertical/column split
     region_size = node.region[1][direction] - node.region[0][direction]
     if region_size < 1:  # cannot divide any further
         return
-    else:
-        split = random.randrange(region_size)  # 0, 1, 2 <-- 1 is selected
-        split_loc = split + node.region[0][direction]
-        node.left = Node()
-        node.right = Node()
 
-        direction_perpendicular = int(not direction)  # door is perpendicular to split direction
-        range_perpendicular = node.region[1][direction_perpendicular] - node.region[0][direction_perpendicular]
-        node.door = random.randrange(range_perpendicular + 1) + node.region[0][direction_perpendicular]
+    split = random.randrange(region_size)
+    split_loc = split + node.region[0][direction]
+    node.left = Node()
+    node.right = Node()
 
-        wall_entry = node.region[0][direction_perpendicular]
-        wall_length = range_perpendicular + 1
+    direction_perpendicular = int(not direction)  # door is perpendicular to split direction
+    range_perpendicular = node.region[1][direction_perpendicular] - node.region[0][direction_perpendicular]
+    node.door = random.randrange(range_perpendicular + 1) + node.region[0][direction_perpendicular]
 
-        if direction == 0:  # horizontal/row split
-            node.left.region = [[node.region[0][0], node.region[0][1]], [node.region[0][0] + split, node.region[1][1]]]
-            node.right.region = [[node.region[0][0] + (split + 1), node.region[0][1]], [node.region[1][0], node.region[1][1]]]
-            walls_horizontal.append([split_loc, wall_entry, wall_length, node.door])
-            sys.stdout.write('horizontal ')
-        else:  # vertical/column split
-            node.left.region = [[node.region[0][0], node.region[0][1]], [node.region[1][0], node.region[0][1] + split]]
-            node.right.region = [[node.region[0][0], node.region[0][1] + (split + 1)], [node.region[1][0], node.region[1][1]]]
-            walls_vertical.append([split_loc, wall_entry, wall_length, node.door])
-            sys.stdout.write('vertical ')
-        sys.stdout.write('split = ' + str(split_loc) + ', door = ' + str(node.door))
-        print(', wall_length = ' + str(wall_length) + ', wall_entry = ' + str(wall_entry))
-        print('left = ' + str(node.left.region))
-        print('right = ' + str(node.right.region))
+    wall_entry = node.region[0][direction_perpendicular]
+    wall_length = range_perpendicular + 1
 
-        # now do it recursively..
-        bsp(node.left)
-        bsp(node.right)
+    if direction == 0:  # horizontal/row split
+        node.left.region = [[node.region[0][0], node.region[0][1]], [node.region[0][0] + split, node.region[1][1]]]
+        node.right.region = [[node.region[0][0] + (split + 1), node.region[0][1]], [node.region[1][0], node.region[1][1]]]
+        walls_horizontal.append([split_loc, wall_entry, wall_length, node.door])
+        sys.stdout.write('horizontal ')
+    else:  # vertical/column split
+        node.left.region = [[node.region[0][0], node.region[0][1]], [node.region[1][0], node.region[0][1] + split]]
+        node.right.region = [[node.region[0][0], node.region[0][1] + (split + 1)], [node.region[1][0], node.region[1][1]]]
+        walls_vertical.append([split_loc, wall_entry, wall_length, node.door])
+        sys.stdout.write('vertical ')
+    sys.stdout.write('split = ' + str(split_loc) + ', door = ' + str(node.door))
+    print(', wall_length = ' + str(wall_length) + ', wall_entry = ' + str(wall_entry))
+    print('left = ' + str(node.left.region))
+    print('right = ' + str(node.right.region))
+
+    # now do it recursively..
+    bsp(node.left)
+    bsp(node.right)
     return
 
 
