@@ -55,8 +55,8 @@ def bsp(node):
     return
 
 
+# using wall/door data populated by bsp, create a matrix representing the maze layout
 def walls_and_doors(rows, cols):
-    # initialize the matrix...
     horizontal_matrix = [[0 for x in range(cols)] for y in range(rows - 1)]
     vertical_matrix = [[0 for x in range(cols - 1)] for y in range(rows)]
     matrix = [horizontal_matrix, vertical_matrix]
